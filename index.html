@@ -188,23 +188,26 @@ button{
 
 /* MODAL */
 .modal{
-  position:absolute;
-  inset:0;
-  display:none;
-  place-items:center;
-  background:rgba(255,222,227,.6);
-  backdrop-filter:blur(10px);
-  border-radius:28px;
-  z-index:10;
+  position: fixed;          /* ✅ instead of absolute */
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;            /* prevents edge clipping on mobile */
+  background: rgba(255,222,227,.6);
+  backdrop-filter: blur(10px);
+  z-index: 10000;           /* above everything */
 }
-.modal.show{ display:grid; }
+.modal.show{ display: flex; }
 
 .modal-inner{
-  background:rgba(255,255,255,.9);
-  border-radius:26px;
-  width:min(520px,95%);
-  text-align:center;
-  overflow:hidden;
+  background: rgba(255,255,255,.9);
+  border-radius: 26px;
+  width: min(520px, 92vw);  /* ✅ consistent centering */
+  max-width: 520px;
+  text-align: center;
+  overflow: hidden;
+  margin: 0 auto;     
 }
 
 .yay-img{
