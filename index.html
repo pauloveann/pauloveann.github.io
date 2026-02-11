@@ -1,0 +1,945 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<!-- ⭐ FAVICON -->
+<link rel="icon" href="Favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="Favicon.ico" type="image/x-icon">
+
+<title>Ann - Will you be my Valentine?</title>
+
+<style>
+:root{
+  --c1:#C00000;
+  --c2:#FF3334;
+  --c4:#FFBBC1;
+  --c6:#FF8896;
+  --ink:#6a0b17;
+}
+
+*{ box-sizing:border-box; }
+
+/* 🎯 Custom cursor everywhere */
+*,
+*::before,
+*::after{
+  cursor: url("./cursor_V3.png") 8 8, auto;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  background:
+    linear-gradient(rgba(255,222,227,0.55), rgba(255,222,227,0.55)),
+    url("https://shoplineimg.com/media/65b55d24de253c4f37d778e1/original.webp?source_format=jpeg");
+  background-repeat: repeat, repeat;
+  background-size: 650px 650px, 650px 650px;
+  background-position: center;
+
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+}
+
+/* ✨ Sparkles */
+.sparkles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:1;
+}
+.sparkle{
+  position:absolute;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(255,255,255,.95), transparent 70%);
+  animation: float linear infinite, twinkle ease-in-out infinite;
+}
+@keyframes float{
+  from{ transform: translateY(110vh) scale(var(--s)); }
+  to{ transform: translateY(-20vh) scale(var(--s)); }
+}
+@keyframes twinkle{
+  0%,100%{ opacity:.2; }
+  50%{ opacity:.9; }
+}
+
+/* 💓 Heartbeat */
+@keyframes heartbeat{
+  0%,100%{ transform:scale(1); }
+  14%{ transform:scale(1.012); }
+  28%{ transform:scale(1); }
+  42%{ transform:scale(1.02); }
+  70%{ transform:scale(1); }
+}
+
+.wrap{
+  width:100%;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  position:relative;
+  z-index:2;
+}
+
+/* Shared card styling */
+.card{
+  width:min(640px,92vw);
+  background: rgba(255,255,255,0.40);
+  border-radius:28px;
+  padding:30px 28px 32px;
+  box-shadow:0 20px 60px rgba(192,0,0,.25);
+  border:1px solid rgba(255,51,52,.22);
+  backdrop-filter: blur(10px);
+  position:relative;
+}
+
+#valentineCard{
+  display:none;                 /* hidden until PIN success */
+  animation: heartbeat 2.4s ease-in-out infinite;
+}
+
+/* content */
+.name{
+  font-size:22px;
+  font-weight:900;
+  color:var(--c1);
+}
+
+h1{
+  margin:4px 0 12px;
+  font-size:clamp(28px,3.6vw,40px);
+  color:var(--ink);
+  white-space:nowrap;
+}
+
+p{
+  margin:0 0 22px;
+  font-weight:600;
+}
+
+/* Buttons */
+button{
+  padding:14px;
+  border-radius:18px;
+  border:none;
+  font-size:16px;
+  font-weight:900;
+  cursor: url("./cursor.png") 8 8, pointer;
+}
+
+.actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  position:relative; /* for initial layout only */
+}
+
+.yes{
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  color:white;
+  box-shadow:0 14px 26px rgba(192,0,0,.20);
+}
+
+.no{
+  background:rgba(255,255,255,.8);
+  color:var(--c1);
+  border:1px solid rgba(255,51,52,.25);
+  white-space:nowrap;
+}
+
+/* 🔊 Volume button */
+.vol-btn{
+  position:fixed;
+  top:14px;
+  right:14px;
+  z-index:50;
+  width:44px;
+  height:44px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.55);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 12px 28px rgba(0,0,0,.10);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  user-select:none;
+  padding:0;
+}
+.vol-icon{
+  font-size:20px;
+  line-height:1;
+  transform: translateY(1px);
+}
+
+/* MODAL */
+.modal{
+  position:absolute;
+  inset:0;
+  display:none;
+  place-items:center;
+  background:rgba(255,222,227,.6);
+  backdrop-filter:blur(10px);
+  border-radius:28px;
+  z-index:10;
+}
+.modal.show{ display:grid; }
+
+.modal-inner{
+  background:rgba(255,255,255,.9);
+  border-radius:26px;
+  width:min(520px,95%);
+  text-align:center;
+  overflow:hidden;
+}
+
+.yay-img{
+  width:100%;
+  max-height:35vh;     /* requested */
+  object-fit:contain;
+  display:block;
+  margin:0;
+}
+
+.modal-text{
+  padding:0 20px 22px; /* top padding 0 */
+}
+
+.close{
+  margin-top:12px;
+  width:100%;
+  padding:12px;
+  border-radius:16px;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--c4),var(--c6));
+  color:var(--c1);
+  border:none;
+}
+
+/* 🔐 PIN gate */
+.gate{ text-align:center; }
+.gate-title{
+  margin:0 0 6px;
+  font-size:26px;
+  font-weight:1000;
+  color:var(--c1);
+}
+.gate-sub{
+  margin:0 0 18px;
+  font-weight:650;
+  opacity:.9;
+}
+
+.pin-row{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin: 8px 0 16px;
+}
+
+.pin{
+  width:54px;
+  height:60px;
+  border-radius:16px;
+  border:1px solid rgba(255,51,52,.25);
+  background: rgba(255,255,255,.55);
+  backdrop-filter: blur(6px);
+  text-align:center;
+  font-size:26px;
+  font-weight:900;
+  color:var(--ink);
+  outline:none;
+}
+.pin:focus{
+  border-color: rgba(192,0,0,.55);
+  box-shadow: 0 0 0 6px rgba(255,51,52,.12);
+}
+
+.enter-btn{
+  width:100%;
+  background: linear-gradient(135deg, var(--c1), var(--c2));
+  color:#fff;
+  box-shadow:0 14px 26px rgba(192,0,0,.20);
+}
+
+.error{
+  margin-top:10px;
+  font-weight:900;
+  color: var(--c1);
+  display:none;
+}
+
+@keyframes shake{
+  0%,100%{ transform: translateX(0); }
+  20%{ transform: translateX(-7px); }
+  40%{ transform: translateX(7px); }
+  60%{ transform: translateX(-6px); }
+  80%{ transform: translateX(6px); }
+}
+.shake{ animation: shake .35s ease; }
+
+/* 🖼️ Hover "No" image fly-by layer */
+.flyby{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:999; /* above everything */
+}
+.flyby img{
+  position:absolute;
+  will-change: transform, opacity;
+  opacity:0;
+  filter: drop-shadow(0 18px 40px rgba(0,0,0,.18));
+}
+/* ⏳ LOADING OVERLAY */
+.loader{
+  position:fixed;
+  inset:0;
+  display:none;
+  place-items:center;
+  z-index:9999;
+  background: rgba(255,222,227,.01);
+  backdrop-filter: blur(1px);
+}
+.loader.show{ display:grid; }
+
+.loader-inner{
+  position: relative;
+  display: flex;
+  flex-direction: column;   /* stack vertically */
+  align-items: center;
+  justify-content: center;
+  gap: 18px;                /* space between image & button */
+  width: min(520px, 92vw);
+}
+
+
+/* the loading image frame */
+.loader-frame{
+  width: min(520px, 92vw);
+  height: auto;
+  max-height: 65vh;
+  object-fit: contain;
+  display: block;
+  opacity:0;
+  transform: translateY(18px) scale(.92);
+  filter: drop-shadow(0 18px 40px rgba(0,0,0,.16));
+  will-change: transform, opacity;
+}
+
+/* Wave IN and then HOLD (stays visible) */
+@keyframes waveInHold{
+  0%   { opacity:0; transform: translateY(26px) translateX(-14px) rotate(-6deg) scale(.92); }
+  45%  { opacity:1; transform: translateY(-10px) translateX(10px)  rotate(5deg)  scale(1.02); }
+  75%  { opacity:1; transform: translateY(6px)  translateX(-6px)  rotate(-2deg) scale(1.00); }
+  100% { opacity:1; transform: translateY(0px)  translateX(0px)   rotate(0deg)  scale(1.00); }
+}
+
+/* Wave OUT (plays when user clicks) */
+@keyframes waveOut{
+  0%   { opacity:1; transform: translateY(0px) translateX(0px) rotate(0deg) scale(1.00); }
+  100% { opacity:0; transform: translateY(-22px) translateX(14px) rotate(7deg) scale(.96); }
+}
+
+
+.loader-hint{
+  font-weight: 900;
+  color: var(--ink);
+  background: rgba(255,255,255,.75);
+  border: 1px solid rgba(255,51,52,.25);
+  padding: 10px 18px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  user-select: none;
+  cursor: pointer;
+  transition: transform .15s ease;
+}
+
+.loader-hint:hover{
+  transform: scale(1.05);
+}
+
+
+/* =========================
+   🌊 Background Ripple Effect
+   ========================= */
+
+.ripples{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;   /* IMPORTANT: don’t block clicks */
+  z-index: 0;             /* behind cards, above background */
+  overflow: hidden;
+}
+
+.ripple{
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255,255,255,0.55) 0%,
+    rgba(255,136,150,0.35) 35%,
+    rgba(255,136,150,0.15) 55%,
+    rgba(255,136,150,0.05) 70%,
+    transparent 72%
+  );
+  transform: translate(-50%, -50%) scale(0.3);
+  opacity: 0.9;
+  animation: rippleExpand 1.2s ease-out forwards;
+}
+
+@keyframes rippleExpand{
+  to{
+    transform: translate(-50%, -50%) scale(15);
+    opacity: 0;
+  }
+}
+
+
+/* =========================
+   📱 Mobile responsiveness
+   Paste at the END of CSS
+   ========================= */
+
+/* Better viewport on mobile browsers */
+body{
+  min-height: 100dvh; /* modern mobile safe */
+}
+
+/* Allow title to wrap on small screens */
+h1{
+  white-space: normal;            /* override nowrap */
+  line-height: 1.15;
+  text-wrap: balance;             /* nice if supported */
+}
+
+/* Make the card breathe nicely on small screens */
+@media (max-width: 480px){
+  .card{
+    width: min(640px, 94vw);
+    padding: 22px 18px 22px;
+    border-radius: 22px;
+  }
+
+  .name{ font-size: 18px; }
+
+  p{
+    font-size: 14px;
+    line-height: 1.35;
+    margin-bottom: 18px;
+  }
+
+  .actions{
+    grid-template-columns: 1fr;   /* stack buttons */
+    gap: 12px;
+  }
+
+  button{
+    font-size: 16px;
+    padding: 14px 16px;
+    border-radius: 16px;
+  }
+
+  /* PIN boxes: smaller and fit */
+  .pin-row{
+    gap: 8px;
+  }
+  .pin{
+    width: 44px;
+    height: 54px;
+    border-radius: 14px;
+    font-size: 20px;
+  }
+
+  /* Avoid iOS zooming when tapping inputs */
+  input, button{
+    font-size: 16px;
+  }
+
+  /* Background: slightly smaller to avoid huge tiles */
+  body{
+    background-size: 460px 460px, 460px 460px;
+  }
+
+  /* Modal image a bit shorter on small screens */
+  .yay-img{
+    max-height: 30vh;
+  }
+}
+
+/* Super small devices (older iPhones etc.) */
+@media (max-width: 360px){
+  .pin{ width: 40px; height: 50px; }
+  .gate-title{ font-size: 22px; }
+}
+
+/* Loader: scale nicely on mobile */
+@media (max-width: 480px){
+  .loader-inner{
+    width: min(520px, 92vw);
+    height: min(220px, 34vh);
+  }
+  .loader-frame{
+    width: min(300px, 82vw);
+  }
+}
+
+/* Optional: reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce){
+  #valentineCard{ animation: none; }
+  .sparkle{ animation: none; opacity: .35; }
+  .loader-frame{ animation: none !important; opacity: 1; transform: none; }
+}
+
+
+</style>
+</head>
+
+<body>
+
+<button class="vol-btn" id="volBtn" aria-label="Mute/unmute">
+  <span class="vol-icon" id="volIcon">🔊</span>
+</button>
+
+<!-- 🎵 Music (same directory) -->
+<audio id="bgMusic" src="valentine-music.mp3" loop preload="auto"></audio>
+
+<div class="sparkles" id="sparkles"></div>
+<div class="flyby" id="flyby"></div>
+<!-- ⏳ Loading overlay (hidden by default) -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-inner" id="loaderInner"></div>
+</div>
+
+<div class="wrap">
+
+  <!-- 🔐 PIN FIRST -->
+  <div class="card gate" id="pinGate">
+    <h2 class="gate-title">Enter PIN 🔐</h2>
+    <p class="gate-sub">Only 유경 Baby👧 can unlock this 💘</p>
+
+    <div class="pin-row" id="pinRow">
+      <input type="password" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN digit 1">
+      <input type="password" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN digit 2">
+      <input type="password" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN digit 3">
+      <input type="password" class="pin" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="PIN digit 4">
+    </div>
+
+    <button class="enter-btn" id="enterBtn">Unlock 💗</button>
+    <div class="error" id="pinError">Wrong PIN 😭 Try again.</div>
+  </div>
+
+  <!-- 💌 MAIN CARD -->
+  <div class="card" id="valentineCard">
+    <div class="name">유경 Baby👧,</div>
+    <h1>Will you be my Valentine? 💌</h1>
+    <p>I promise dakbal🍗, banana buzz🍹, and delicious jjamppong 🍜</p>
+
+    <div class="actions" id="actions">
+      <button class="yes" id="yesBtn">Yes 💖</button>
+      <button class="no" id="noBtn">No 😭</button>
+    </div>
+
+    <div class="modal" id="modal">
+      <div class="modal-inner">
+        <img src="yay.png" alt="Yay!" class="yay-img">
+        <div class="modal-text">
+          <h2 style="margin:10px 0 6px;">사랑해! 💕</h2>
+          <p style="margin:0;">You’re officially my Valentine.</p>
+          <button class="close" id="closeBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="ripples" id="ripples"></div>
+<script>
+/* ---------- Elements ---------- */
+const music = document.getElementById("bgMusic");
+const volBtn = document.getElementById("volBtn");
+const volIcon = document.getElementById("volIcon");
+
+const sparkles = document.getElementById("sparkles");
+const flyby = document.getElementById("flyby");
+
+const pinGate = document.getElementById("pinGate");
+const valentineCard = document.getElementById("valentineCard");
+const enterBtn = document.getElementById("enterBtn");
+const pinError = document.getElementById("pinError");
+const pinInputs = Array.from(document.querySelectorAll(".pin"));
+const pinRow = document.getElementById("pinRow");
+
+const actions = document.getElementById("actions");
+const yesBtn = document.getElementById("yesBtn");
+const noBtn = document.getElementById("noBtn");
+const modal = document.getElementById("modal");
+const closeBtn = document.getElementById("closeBtn");
+
+const loader = document.getElementById("loader");
+const loaderInner = document.getElementById("loaderInner");
+
+let userMuted = false;
+
+/* ---------- Music (browser autoplay rules) ---------- */
+function safePlayMusic(){
+  if (!userMuted) music.play().catch(()=>{});
+}
+
+(async function tryAutoplay(){
+  try{
+    music.volume = 0.6;
+    await music.play();
+  }catch(_){
+    // blocked: will start on user gesture
+  }
+})();
+
+window.addEventListener("pointerdown", ()=>{
+  safePlayMusic();
+},{ once:true });
+
+volBtn.addEventListener("click", async () => {
+  userMuted = !userMuted;
+  music.muted = userMuted;
+  volIcon.textContent = userMuted ? "🔇" : "🔊";
+  if (!userMuted) safePlayMusic();
+});
+
+/* ---------- PIN Gate ---------- */
+function getPin(){ return pinInputs.map(i => i.value).join(""); }
+function clearPin(){
+  pinInputs.forEach(i => i.value = "");
+  pinInputs[0].focus();
+}
+
+async function unlockIfCorrect(){
+  if (getPin() === "1014"){
+    pinError.style.display = "none";
+
+    // hide gate first
+    pinGate.style.display = "none";
+
+    // run loader sequence
+    safePlayMusic();
+    startClickLoader();
+    return;
+    // THEN show card
+    valentineCard.style.display = "block";
+
+    // Reset NO button to normal flow first
+    noBtn.style.position = "relative";
+    noBtn.style.left = "";
+    noBtn.style.top = "";
+    noBtn.style.right = "";
+    noBtn.style.transform = "rotate(0deg)";
+
+    // Lock initial NO size so it stays stable when we go absolute
+    const r = noBtn.getBoundingClientRect();
+    noBtn.style.width = r.width + "px";
+    noBtn.style.height = r.height + "px";
+    return;
+  }
+
+  pinError.style.display = "block";
+  pinRow.classList.remove("shake");
+  void pinRow.offsetWidth;
+  pinRow.classList.add("shake");
+  clearPin();
+}
+
+
+pinInputs.forEach((input, idx) => {
+  input.addEventListener("input", () => {
+    input.value = (input.value || "").replace(/\D/g, "").slice(0,1);
+    if (input.value && idx < pinInputs.length - 1) pinInputs[idx + 1].focus();
+    if (getPin().length === 4) unlockIfCorrect();
+  });
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !input.value && idx > 0) pinInputs[idx - 1].focus();
+    if (e.key === "Enter") unlockIfCorrect();
+  });
+});
+
+enterBtn.addEventListener("click", unlockIfCorrect);
+window.addEventListener("load", () => pinInputs[0].focus());
+
+/* ---------- WILD NO button dodge (inside the whole card) ---------- */
+function moveNoWild(){
+  const cardRect = valentineCard.getBoundingClientRect();
+  const btnRect = noBtn.getBoundingClientRect();
+  const pad = 10;
+
+  const maxX = Math.max(pad, cardRect.width  - btnRect.width  - pad);
+  const maxY = Math.max(pad, cardRect.height - btnRect.height - pad);
+
+  // random position
+  let x = pad + Math.random() * (maxX - pad);
+  let y = pad + Math.random() * (maxY - pad);
+
+  // sometimes slam near edges
+  const r = Math.random();
+  if (r < 0.18) x = pad;           // left
+  else if (r < 0.36) x = maxX;     // right
+  if (r > 0.70) y = pad;           // top
+  if (r > 0.88) y = maxY;          // bottom
+
+  // IMPORTANT: position relative to the CARD
+  noBtn.style.position = "absolute";
+  noBtn.style.left = x + "px";
+  noBtn.style.top  = y + "px";
+
+  // chaos rotation
+  const rot = (Math.random() * 50 - 25).toFixed(1);
+  noBtn.style.transform = `rotate(${rot}deg)`;
+}
+
+/* ---------- Random image fly-by on NO hover ---------- */
+const flyImgs = ["random1.png","random2.png","random3.png","random4.png","random5.png"];
+// preload to avoid lag
+flyImgs.forEach(src => { const im = new Image(); im.src = src; });
+
+let lastFlyAt = 0;
+function rand(min, max){ return min + Math.random()*(max-min); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function randomEdgeStart(w, h){
+  const edge = Math.floor(Math.random()*4); // 0 top,1 right,2 bottom,3 left
+  if (edge === 0) return { x: rand(0, innerWidth - w), y: -h - 30 };
+  if (edge === 1) return { x: innerWidth + 30, y: rand(0, innerHeight - h) };
+  if (edge === 2) return { x: rand(0, innerWidth - w), y: innerHeight + 30 };
+  return { x: -w - 30, y: rand(0, innerHeight - h) };
+}
+
+function randomEdgeEnd(w, h){
+  // different edge from start vibe
+  return randomEdgeStart(w, h);
+}
+
+function flyBy(){
+  const now = Date.now();
+  if (now - lastFlyAt < 220) return; // throttle (quick but not insane)
+  lastFlyAt = now;
+
+  const img = document.createElement("img");
+  img.src = pick(flyImgs);
+  img.alt = "";
+
+  // size (feel free to tweak)
+  const base = Math.min(innerWidth, innerHeight);
+  const size = Math.max(160, Math.min(360, base * 0.35));
+  img.style.width = size + "px";
+  img.style.height = "auto";
+
+  flyby.appendChild(img);
+
+  // compute positions after it’s in DOM
+  requestAnimationFrame(() => {
+    const rect = img.getBoundingClientRect();
+    const w = rect.width || size;
+    const h = rect.height || size * 0.7;
+
+    const start = randomEdgeStart(w, h);
+    const mid = {
+      x: rand(0, Math.max(0, innerWidth - w)),
+      y: rand(0, Math.max(0, innerHeight - h))
+    };
+    const end = randomEdgeEnd(w, h);
+
+    const rot1 = rand(-30, 30);
+    const rot2 = rand(-18, 18);
+    const rot3 = rand(-40, 40);
+
+    // fast slide in/out
+    const duration = rand(4000, 6000);
+
+    img.animate([
+      { transform: `translate(${start.x}px, ${start.y}px) rotate(${rot1}deg) scale(0.96)`, opacity: 0 },
+      { transform: `translate(${mid.x}px, ${mid.y}px) rotate(${rot2}deg) scale(1.02)`, opacity: 1, offset: 0.45 },
+      { transform: `translate(${end.x}px, ${end.y}px) rotate(${rot3}deg) scale(0.98)`, opacity: 0 }
+    ], {
+      duration,
+      easing: "cubic-bezier(.2,.9,.2,1)",
+      fill: "forwards"
+    }).onfinish = () => img.remove();
+  });
+}
+
+/* Hook NO hover: move + image fly-by */
+noBtn.addEventListener("mouseenter", () => {
+  if (valentineCard.style.display !== "block") return;
+  moveNoWild();
+  flyBy();
+});
+noBtn.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (valentineCard.style.display !== "block") return;
+  moveNoWild();
+  flyBy();
+});
+
+/* ---------- YES / Modal ---------- */
+yesBtn.addEventListener("click", ()=> {
+  modal.classList.add("show");
+  safePlayMusic();
+});
+closeBtn.addEventListener("click", ()=>{
+  modal.classList.remove("show");
+
+  // reset NO button to original grid spot (no chaos)
+  noBtn.style.position = "relative";
+  noBtn.style.left = "";
+  noBtn.style.top = "";
+  noBtn.style.transform = "rotate(0deg)";
+});
+
+/* ---------- Sparkles ---------- */
+function sparkle(){
+  const s=document.createElement("div");
+  s.className="sparkle";
+  s.style.left=Math.random()*100+"vw";
+  s.style.setProperty("--s",(0.5+Math.random()*1.5).toFixed(2));
+  s.style.animationDuration=(6+Math.random()*8)+"s,"+(1+Math.random()*2)+"s";
+  sparkles.appendChild(s);
+  setTimeout(()=>s.remove(),12000);
+}
+for(let i=0;i<30;i++) setTimeout(sparkle,i*150);
+setInterval(sparkle,350);
+
+/* ---------- Click-to-Advance Loading ---------- */
+const loadImgs = ["load1.jpg","load2.jpg","load3.jpg","load4.jpg","load5.jpg","load6.jpg"];
+
+// preload so it doesn't lag
+loadImgs.forEach(src => { const im = new Image(); im.src = src; });
+
+let loaderIndex = 0;
+let loaderActive = false;
+
+function showLoader(){
+  loader.classList.add("show");
+  loader.setAttribute("aria-hidden", "false");
+}
+
+function hideLoader(){
+  loader.classList.remove("show");
+  loader.setAttribute("aria-hidden", "true");
+  loaderInner.innerHTML = "";
+  loaderActive = false;
+}
+
+function renderLoaderFrame(idx){
+  loaderInner.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.src = loadImgs[idx];
+  img.className = "loader-frame";
+  img.alt = "";
+
+  loaderInner.appendChild(img);
+
+  // restart animation every click
+  img.style.animation = "none";
+  void img.offsetWidth;
+  img.style.animation = "waveInHold 520ms cubic-bezier(.2,.9,.2,1) forwards";
+
+
+  // click hint
+  const hint = document.createElement("div");
+  hint.className = "loader-hint";
+  hint.textContent = `Click to continue 💗 (${idx + 1}/${loadImgs.length})`;
+  loaderInner.appendChild(hint);
+}
+
+function startClickLoader(){
+  loaderIndex = 0;
+  loaderActive = true;
+  showLoader();
+  renderLoaderFrame(loaderIndex);
+}
+
+function advanceClickLoader(){
+  if (!loaderActive) return;
+
+  const img = loaderInner.querySelector("img.loader-frame");
+
+  // play wave OUT first, then change frame
+  if (img){
+    img.style.animation = "waveOut 220ms ease forwards";
+  }
+
+  setTimeout(() => {
+    loaderIndex++;
+
+    // finished
+    if (loaderIndex >= loadImgs.length){
+      hideLoader();
+      valentineCard.style.display = "block";
+
+      // reset NO button safely
+      noBtn.style.position = "relative";
+      noBtn.style.left = "";
+      noBtn.style.top = "";
+      noBtn.style.transform = "rotate(0deg)";
+
+      const r = noBtn.getBoundingClientRect();
+      noBtn.style.width = r.width + "px";
+      noBtn.style.height = r.height + "px";
+      return;
+    }
+
+    renderLoaderFrame(loaderIndex);
+  }, 220); // match waveOut duration
+}
+
+/* ---------- Background Ripple ---------- */
+const rippleLayer = document.getElementById("ripples");
+
+let lastRipple = 0;
+
+function createRipple(x, y){
+  const now = Date.now();
+  if (now - lastRipple < 80) return; // throttle
+  lastRipple = now;
+
+  const r = document.createElement("div");
+  r.className = "ripple";
+  r.style.left = x + "px";
+  r.style.top = y + "px";
+
+  rippleLayer.appendChild(r);
+
+  r.addEventListener("animationend", () => r.remove());
+}
+
+// mouse hover (desktop)
+window.addEventListener("mousemove", (e) => {
+  createRipple(e.clientX, e.clientY);
+});
+
+// tap ripple (mobile)
+window.addEventListener("touchstart", (e) => {
+  const t = e.touches[0];
+  if (!t) return;
+  createRipple(t.clientX, t.clientY);
+});
+
+// IMPORTANT: attach click handler once
+loader.addEventListener("click", advanceClickLoader);
+
+
+
+</script>
+<!-- 🌊 Ripple layer -->
+
+
+</body>
+</html>
