@@ -517,10 +517,11 @@ h1{
   body {
     background-size: 400px 400px, 400px 400px;
   }
-  
+
   h1{
     font-size: 6vw;
   }
+
   .modal{
     position: fixed !important;
     inset: 0 !important;
@@ -538,6 +539,49 @@ h1{
     margin: 0 auto !important;
   }
 }
+
+/* 💗 YES hearts burst */
+.hearts{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998; /* below loader (9999) but above most stuff */
+  overflow: hidden;
+}
+
+.heart{
+  position: absolute;
+  left: 50%;
+  bottom: -24px;
+  font-size: 18px;
+  opacity: 0;
+  transform: translateX(-50%) translateY(0) scale(1);
+  filter: drop-shadow(0 12px 22px rgba(0,0,0,.10));
+  will-change: transform, opacity;
+  animation:
+    heartUp var(--dur) cubic-bezier(.2,.9,.2,1) forwards;
+}
+
+@keyframes heartUp{
+  0%{
+    opacity: 0;
+    transform: translateX(var(--x)) translateY(0) rotate(var(--r)) scale(var(--s));
+  }
+  8%{
+    opacity: 1;
+  }
+  100%{
+    opacity: 0;
+    transform: translateX(calc(var(--x) + var(--drift))) translateY(calc(-1 * var(--rise)))
+      rotate(calc(var(--r) + 160deg)) scale(calc(var(--s) * 1.08));
+  }
+}
+
+/* Optional: reduced motion */
+@media (prefers-reduced-motion: reduce){
+  .heart{ animation: none !important; display:none !important; }
+}
+
 </style>
 </head>
 
@@ -551,6 +595,7 @@ h1{
 <audio id="bgMusic" src="valentine-music.mp3" loop preload="auto"></audio>
 
 <div class="sparkles" id="sparkles"></div>
+<div class="hearts" id="hearts"></div>
 <div class="flyby" id="flyby"></div>
 <!-- ⏳ Loading overlay (hidden by default) -->
 <div class="loader" id="loader" aria-hidden="true">
@@ -827,9 +872,11 @@ noBtn.addEventListener("click", (e) => {
 
 /* ---------- YES / Modal ---------- */
 yesBtn.addEventListener("click", ()=> {
+  burstHearts(70);          // ← tweak number (50–120 feels great)
   modal.classList.add("show");
   safePlayMusic();
 });
+
 closeBtn.addEventListener("click", ()=>{
   modal.classList.remove("show");
 
@@ -973,6 +1020,44 @@ window.addEventListener("touchstart", (e) => {
 // IMPORTANT: attach click handler once
 loader.addEventListener("click", advanceClickLoader);
 
+/* 💗 Hearts burst on YES */
+const heartsLayer = document.getElementById("hearts");
+
+function rand(min, max){ return min + Math.random()*(max-min); }
+
+function burstHearts(count = 50){
+  if (!heartsLayer) return;
+
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+
+  for (let i = 0; i < count; i++){
+    const heart = document.createElement("div");
+    heart.className = "heart";
+    heart.textContent = Math.random() < 0.12 ? "💞" : (Math.random() < 0.2 ? "💕" : "💖");
+
+    // spread across width, start near bottom
+    const x = rand(-w/2 + 10, w/2 - 10);       // relative to center
+    const drift = rand(-120, 120) + "px";     // sideways drift
+    const rise = rand(h * 0.55, h * 0.95) + "px";
+    const rot = rand(-40, 40) + "deg";
+    const scale = rand(0.8, 1.6).toFixed(2);
+    const dur = rand(1400, 2600).toFixed(0) + "ms";
+    const delay = rand(0, 420).toFixed(0) + "ms";
+
+    heart.style.setProperty("--x", x + "px");
+    heart.style.setProperty("--drift", drift);
+    heart.style.setProperty("--rise", rise);
+    heart.style.setProperty("--r", rot);
+    heart.style.setProperty("--s", scale);
+    heart.style.setProperty("--dur", dur);
+    heart.style.animationDelay = delay;
+
+    heartsLayer.appendChild(heart);
+
+    heart.addEventListener("animationend", () => heart.remove());
+  }
+}
 
 
 </script>
@@ -981,5 +1066,3 @@ loader.addEventListener("click", advanceClickLoader);
 
 </body>
 </html>
-
-
